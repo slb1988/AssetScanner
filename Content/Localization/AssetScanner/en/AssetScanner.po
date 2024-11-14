@@ -1,0 +1,57 @@
+﻿# AssetScanner English translation.
+# Fill out your copyright notice in the Description page of Project Settings.
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: AssetScanner\n"
+"POT-Creation-Date: 2024-10-31 08:21\n"
+"PO-Revision-Date: 2024-10-31 08:21\n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Key:	BrowserTitle
+#. SourceLocation:	Plugins/AssetScanner/Source/AssetScanner/Private/AssetScanner.cpp(77)
+#: Plugins/AssetScanner/Source/AssetScanner/Private/AssetScanner.cpp(77)
+msgctxt "AssetScanner,BrowserTitle"
+msgid "AssetScannerBrowser"
+msgstr "Asset Scanner Browser"
+
+#. Key:	Browser
+#. SourceLocation:	Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(20)
+#: Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(20)
+msgctxt "AssetScanner,Browser"
+msgid "Asset Scanner Browser"
+msgstr "Asset Scanner Browser"
+
+#. Key:	Browser_Tips
+#. SourceLocation:	Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(21)
+#: Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(21)
+msgctxt "AssetScanner,Browser_Tips"
+msgid "Open Asset Scanner Browser"
+msgstr "Open Asset Scanner Browser"
+
+#. Key:	Commandlet
+#. SourceLocation:	Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(7)
+#: Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(7)
+msgctxt "AssetScanner,Commandlet"
+msgid "Asset Scanner Commandlet"
+msgstr "Asset Scanner Commandlet"
+
+#. Key:	Commandlet_Tips
+#. SourceLocation:	Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(8)
+#: Plugins/AssetScanner/Source/AssetScanner/Private/AssetScannerCommands.cpp(8)
+msgctxt "AssetScanner,Commandlet_Tips"
+msgid "Execute Asset Scanner Commandlet"
+msgstr "Execute Asset Scanner Commandlet"
+
+#. Key:	AssetScanner
+#. SourceLocation:	Plugins/AssetScanner/Source/AssetScanner/Public/AssetScannerCommands.h(15)
+#: Plugins/AssetScanner/Source/AssetScanner/Public/AssetScannerCommands.h(15)
+msgctxt "Contexts,AssetScanner"
+msgid "AssetScanner Plugin"
+msgstr "AssetScanner Plugin"
+
