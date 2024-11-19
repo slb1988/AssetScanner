@@ -4,6 +4,9 @@ Unreal Engine 5 plugin use for Asset Checking with CustomRules
 
 # UI调用入口
 - Tools/AssetCleannerBrowser
+
+![](/Pic/AssetCleannerBrowser.jpg)
+
 - Tools/AssetCleannerCommandlet
 
 # 使用指南
