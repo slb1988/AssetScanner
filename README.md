@@ -9,6 +9,9 @@ Unreal Engine 5 plugin use for Asset Checking with CustomRules
 
 - Tools/AssetCleannerCommandlet
 
+![](/Pic/AssetScannerCommandlet.png)
+
+
 # 使用指南
 添加新规则，一般只需要修改 CustomRuleIds.h 和 添加 CustomRule_ 继承UCustomRuleBase即可
 具体使用方法见 插件中的CustomRule_xxx.cpp
