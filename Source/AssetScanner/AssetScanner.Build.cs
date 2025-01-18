@@ -39,6 +39,7 @@ public class AssetScanner : ModuleRules
 			new string[]
 			{
 				"CoreUObject",
+				"Core",
 				"Engine",
 				"Slate",
 				"SlateCore",

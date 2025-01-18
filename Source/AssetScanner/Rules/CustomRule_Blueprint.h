@@ -21,21 +21,21 @@ class ASSETSCANNER_API UCustomRule_Blueprint : public UCustomRuleBase
 
 public:
 
-	virtual ECustomRuleIds GetRuleID() override
+	virtual ECustomRuleIds GetRuleID_Implementation() override
 	{
 		return ECustomRuleIds::BlueprintCheck;
 	}
-	virtual FString GetName() override
+	virtual FString GetName_Implementation() override
 	{
 		return TEXT("BlueprintCheck");
 	}
 	
-	virtual FString GetDescription() override
+	virtual FString GetDescription_Implementation() override
 	{
 		return TEXT("Blueprint Check");
 	}
 	
-	virtual void InitDataTable(TObjectPtr<URuleDataTable> InDataTable) override
+	virtual void InitDataTable_Implementation(URuleDataTable* InDataTable) override
 	{
 		InDataTable->AddColumn(FColumnIds::Name, 0.25f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
 		InDataTable->AddColumn(FColumnIds::Path, 0.45f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
@@ -43,7 +43,7 @@ public:
 		InDataTable->AddColumn(FColumnIds::Triangles, 0.15f, UObject::FAssetRegistryTag::ETagType::TT_Numerical);
 	}
 
-	virtual bool CheckImplement() override
+	virtual bool CheckImplement_Implementation() override
 	{
 		UAssetManager& Manager = UAssetManager::Get();
 		IAssetRegistry& AssetRegistry = Manager.GetAssetRegistry();

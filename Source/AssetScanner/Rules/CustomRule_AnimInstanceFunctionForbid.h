@@ -21,28 +21,28 @@ class ASSETSCANNER_API UCustomRule_AnimInstanceFunctionForbid : public UCustomRu
 
 public:
 
-	virtual ECustomRuleIds GetRuleID() override
+	virtual ECustomRuleIds GetRuleID_Implementation() override
 	{
 		return ECustomRuleIds::AnimInstanceFunctionForbid;
 	}
-	virtual FString GetName() override
+	virtual FString GetName_Implementation() override
 	{
 		return TEXT("AnimInstanceFunctionForbid");
 	}
 	
-	virtual FString GetDescription() override
+	virtual FString GetDescription_Implementation() override
 	{
 		return TEXT("AnimInstance Function Forbidden");
 	}
 	
-	virtual void InitDataTable(TObjectPtr<URuleDataTable> InDataTable) override
+	virtual void InitDataTable_Implementation(URuleDataTable* InDataTable) override
 	{
 		InDataTable->AddColumn(FColumnIds::Name, 0.25f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
 		InDataTable->AddColumn(FColumnIds::Path, 0.45f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
 		InDataTable->AddColumn(FColumnIds::Message, 0.3f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
 	}
 
-	virtual bool IsMatchByData(const FAssetData& AssetData) override
+	virtual bool IsMatchByData_Implementation(const FAssetData& AssetData) override
 	{
 		if (AssetData == nullptr)
 			return false;
@@ -53,7 +53,7 @@ public:
 		return false;
 	}
 
-	virtual bool CheckImplementByData(const FAssetData& AssetData, const UObject* AssetObj) override
+	virtual bool CheckImplementByData_Implementation(const FAssetData& AssetData, const UObject* AssetObj) override
 	{
 		const UAnimBlueprint* AnimBP = Cast<UAnimBlueprint>(AssetObj);
 		if (AnimBP == nullptr)

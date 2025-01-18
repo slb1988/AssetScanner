@@ -54,12 +54,33 @@ TSharedRef<SWidget> SAssetScannerBrowser::CreateToolBar()
 	{
 		if (RuleId == ECustomRuleIds::None)
 			continue;
-		// FName RuleName = EnumPtr->GetNameByValue(static_cast<int>(RuleId));
 		FString RuleName = EnumPtr->GetNameStringByValue(static_cast<int>(RuleId));
 		EnumOptions.Add(MakeShared<FString>(RuleName));
 	}
 
-	return SNew(SHorizontalBox)
+	SceneOptions.Empty();
+	SceneOptions.Add(MakeShared<FString>(TEXT("All")));
+	
+	if (RowItems.Num() > 0)
+	{
+		TSet<FString> UniqueScenes;
+		for (const auto& Item : RowItems)
+		{
+			FString SceneName;
+			if (Item->GetCustomColumnValue(FColumnIds::SceneName, SceneName, nullptr))
+			{
+				UniqueScenes.Add(SceneName);
+			}
+		}
+		
+		for (const auto& Scene : UniqueScenes)
+		{
+			SceneOptions.Add(MakeShared<FString>(Scene));
+		}
+	}
+
+	// 创建基础工具栏
+	TSharedRef<SHorizontalBox> ToolBar = SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
 		[
 			SNew(STextBlock)
@@ -79,13 +100,45 @@ TSharedRef<SWidget> SAssetScannerBrowser::CreateToolBar()
 					return FText::FromString(TEXT("List Rule Option"));
 				})
 			]
+		];
+
+	// 创建场景筛选部分
+	SAssignNew(SceneFilterBox, SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		[
+			SNew(STextBlock)
+			.Text(FText::FromString(TEXT("Scene:")))
 		]
 		+ SHorizontalBox::Slot()
 		[
-			SNew(SButton)
-			.Text(FText::FromString(TEXT("Scan")))
-			.OnClicked(this, &SAssetScannerBrowser::ScanButtonClicked)
+			SNew(SComboBox<TSharedPtr<FString>>)
+			.OptionsSource(&SceneOptions)
+			.OnSelectionChanged(this, &SAssetScannerBrowser::OnSelectedSceneComboChanged)
+			.OnGenerateWidget(this, &SAssetScannerBrowser::OnGenerateSceneComboContent)
+			.Content()
+			[
+				SAssignNew(SceneComboDisplayTextBlock, STextBlock)
+				.Text(FText::FromString(TEXT("All")))
+			]
 		];
+
+	// 根据是否有SceneName列来设置场景筛选部分的可见性
+	SceneFilterBox->SetVisibility(HasSceneNameColumn() ? EVisibility::Visible : EVisibility::Collapsed);
+
+	// 添加场景筛选部分和扫描按钮到工具栏
+	ToolBar->AddSlot()
+	[
+		SceneFilterBox.ToSharedRef()
+	];
+
+	ToolBar->AddSlot()
+	[
+		SNew(SButton)
+		.Text(FText::FromString(TEXT("Scan")))
+		.OnClicked(this, &SAssetScannerBrowser::ScanButtonClicked)
+	];
+
+	return ToolBar;
 }
 
 void SAssetScannerBrowser::OnItemDoubleClick(ListViewItemPtr Item)
@@ -293,10 +346,45 @@ FReply SAssetScannerBrowser::ScanButtonClicked()
 	}
 	ColumnInfos.Empty();
 	ColumnInfos = *tableData->GetColumnInfos();
+	
+	// 更新 AllRowItems 和 RowItems
+	AllRowItems.Empty();
 	RowItems.Empty();
 	for (TSharedPtr<TArray<FString>>& Item : *tableData->GetRows())
 	{
-		RowItems.Add(MakeShared<FAssetViewItemData>(ColumnInfos, Item));
+		auto NewItem = MakeShared<FAssetViewItemData>(ColumnInfos, Item);
+		AllRowItems.Add(NewItem);
+		RowItems.Add(NewItem);
+	}
+	
+	// 更新场景选项和UI可见性
+	SceneOptions.Empty();
+	bool bHasSceneColumn = HasSceneNameColumn();
+	
+	if (bHasSceneColumn)
+	{
+		SceneOptions.Add(MakeShared<FString>(TEXT("All")));
+		
+		TSet<FString> UniqueScenes;
+		for (const auto& Item : AllRowItems)
+		{
+			FString SceneName;
+			if (Item->GetCustomColumnValue(FColumnIds::SceneName, SceneName, nullptr))
+			{
+				UniqueScenes.Add(SceneName);
+			}
+		}
+		
+		for (const auto& Scene : UniqueScenes)
+		{
+			SceneOptions.Add(MakeShared<FString>(Scene));
+		}
+	}
+
+	// 更新场景筛选控件的可见性
+	if (SceneFilterBox.IsValid())
+	{
+		SceneFilterBox->SetVisibility(bHasSceneColumn ? EVisibility::Visible : EVisibility::Collapsed);
 	}
 
 	if (HeaderRow->IsParentValid())
@@ -354,6 +442,60 @@ TSharedRef<ITableRow> SAssetScannerBrowser::OnGenerateRowForListView(TSharedPtr<
                                                                      const TSharedRef<STableViewBase>& OwnerTable)
 {
 	return SNew(SAssetViewTableRow, OwnerTable, RowData);
+}
+
+void SAssetScannerBrowser::OnSelectedSceneComboChanged(TSharedPtr<FString> SelectedOptionString, ESelectInfo::Type ArgType)
+{
+	if (SelectedOptionString.IsValid())
+	{
+		CurrentSelectedScene = *SelectedOptionString.Get();
+		SceneComboDisplayTextBlock->SetText(FText::FromString(CurrentSelectedScene));
+		FilterRowsByScene();
+	}
+}
+
+TSharedRef<SWidget> SAssetScannerBrowser::OnGenerateSceneComboContent(TSharedPtr<FString> InItem)
+{
+	return SNew(STextBlock)
+		.Text(FText::FromString(*InItem.Get()));
+}
+
+void SAssetScannerBrowser::FilterRowsByScene()
+{
+	if (CurrentSelectedScene == TEXT("All"))
+	{
+		RowItems = AllRowItems;
+	}
+	else
+	{
+		RowItems.Empty();
+		for (const auto& Item : AllRowItems)
+		{
+			FString SceneName;
+			if (Item->GetCustomColumnValue(FColumnIds::SceneName, SceneName, nullptr) && 
+				SceneName == CurrentSelectedScene)
+			{
+				RowItems.Add(Item);
+			}
+		}
+	}
+	
+	RefreshListView();
+}
+
+bool SAssetScannerBrowser::HasSceneNameColumn() const
+{
+	if (ColumnInfos.Num() == 0)
+		return false;
+
+	for (const auto& Column : ColumnInfos)
+	{
+		if (Column->ColumnName == FColumnIds::SceneName)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE

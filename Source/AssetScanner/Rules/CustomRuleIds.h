@@ -12,6 +12,11 @@ enum class ECustomRuleIds : int32
 	SkeletonMissingBones = 6,
 	// 检测文件夹是否被外部引用
 	FolderReferenceCheck = 7,
+	
+	SceneActorIsSpecClass,
+	SceneActorFindSpecTag,
+	SceneActorFindComponent,
+	
 	// make sure to update MaxRuleId
 	Count UMETA(Hidden)
 };
@@ -26,6 +31,7 @@ class FColumnIds
 public:
 	static const FName Path;
 	static const FName Name;
+	static const FName SceneName;
 	static const FName Vertices;
 	static const FName Triangles;
 	static const FName Message;

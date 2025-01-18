@@ -77,5 +77,25 @@ private:
 	TSharedPtr<STextBlock> RuleComboDisplayTextBlock;
 	int32 CurrentSelectedRuleId = -1;
 	TArray<TSharedPtr<FColumnInfo>> ColumnInfos;
+	// 用于过滤后显示的行信息
 	TArray<TSharedPtr<FAssetViewItemData>> RowItems;
+
+	// 场景选项相关
+	TArray<TSharedPtr<FString>> SceneOptions;
+	TSharedPtr<STextBlock> SceneComboDisplayTextBlock;
+	FString CurrentSelectedScene = TEXT("All");
+
+	// 场景选择相关函数
+	void OnSelectedSceneComboChanged(TSharedPtr<FString> SelectedOptionString, ESelectInfo::Type ArgType);
+	TSharedRef<SWidget> OnGenerateSceneComboContent(TSharedPtr<FString> InItem);
+	
+	// 用于过滤显示的行项
+	void FilterRowsByScene();
+	TArray<TSharedPtr<FAssetViewItemData>> AllRowItems; // 存储所有原始数据
+
+	// 检查是否包含场景名称列
+	bool HasSceneNameColumn() const;
+	
+	// Scene UI widgets
+	TSharedPtr<SHorizontalBox> SceneFilterBox;
 };

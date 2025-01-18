@@ -2,6 +2,7 @@
 
 const FName FColumnIds::Path = FName("Path");
 const FName FColumnIds::Name = FName("Name");
+const FName FColumnIds::SceneName = FName("SceneName");
 const FName FColumnIds::Vertices = FName("Vertices");
 const FName FColumnIds::Triangles = FName("Triangles");
 const FName FColumnIds::Message = FName("Message");

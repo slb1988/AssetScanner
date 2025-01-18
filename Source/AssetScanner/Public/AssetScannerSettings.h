@@ -57,6 +57,15 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category="ReferenceCheck")
 	TArray<FDirectoryPath> IsolatedReferencePaths;
 
+	UPROPERTY(Config, EditAnywhere, Category="SceneActor")
+	TArray<FSoftClassPath> AttentionClassPaths;
+	
+	UPROPERTY(Config, EditAnywhere, Category="SceneActor")
+	TArray<FString> AttentionTags;
+	
+	UPROPERTY(Config, EditAnywhere, Category="SceneActor")
+	TArray<FSoftClassPath> AttentionComponentClasses;
+
 private:
 	void ConvertRelativePath(FString& InOutPath);
 #if WITH_EDITOR

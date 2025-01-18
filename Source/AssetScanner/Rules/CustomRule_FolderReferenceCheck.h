@@ -23,21 +23,21 @@ class ASSETSCANNER_API UCustomRule_FolderReferenceCheck : public UCustomRuleBase
 
 public:
 
-	virtual ECustomRuleIds GetRuleID() override
+	virtual ECustomRuleIds GetRuleID_Implementation() override
 	{
 		return ECustomRuleIds::FolderReferenceCheck;
 	}
-	virtual FString GetName() override
+	virtual FString GetName_Implementation() override
 	{
 		return TEXT("FolderReferenceCheck");
 	}
 	
-	virtual FString GetDescription() override
+	virtual FString GetDescription_Implementation() override
 	{
 		return TEXT("Folder Reference Check");
 	}
 	
-	virtual void InitDataTable(TObjectPtr<URuleDataTable> InDataTable) override
+	virtual void InitDataTable_Implementation(URuleDataTable* InDataTable) override
 	{
 		InDataTable->AddColumn(FColumnIds::Name, 0.25f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
 		InDataTable->AddColumn(FColumnIds::Path, 0.45f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
@@ -74,7 +74,7 @@ public:
 		}
 	}
 
-	virtual bool CheckImplement() override
+	virtual bool CheckImplement_Implementation() override
 	{
 		UAssetScannerSettings* Settings = GetMutableDefault<UAssetScannerSettings>();
 		for (const FDirectoryPath& DirPath : Settings->IsolatedReferencePaths)

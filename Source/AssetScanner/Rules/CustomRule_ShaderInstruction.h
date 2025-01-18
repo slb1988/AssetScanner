@@ -22,28 +22,28 @@ class ASSETSCANNER_API UCustomRule_ShaderInstruction : public UCustomRuleBase
 
 public:
 
-	virtual ECustomRuleIds GetRuleID() override
+	virtual ECustomRuleIds GetRuleID_Implementation() override
 	{
 		return ECustomRuleIds::ShaderInstruction;
 	}
-	virtual FString GetName() override
+	virtual FString GetName_Implementation() override
 	{
 		return TEXT("ShaderInstruction");
 	}
 	
-	virtual FString GetDescription() override
+	virtual FString GetDescription_Implementation() override
 	{
 		return TEXT("ShaderInstruction");
 	}
 	
-	virtual void InitDataTable(TObjectPtr<URuleDataTable> InDataTable) override
+	virtual void InitDataTable_Implementation(URuleDataTable* InDataTable) override
 	{
 		InDataTable->AddColumn(FColumnIds::Name, 0.25f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
 		InDataTable->AddColumn(FColumnIds::Path, 0.45f, UObject::FAssetRegistryTag::ETagType::TT_Alphabetical);
 		InDataTable->AddColumn(FColumnIds::Instructions, 0.3f, UObject::FAssetRegistryTag::ETagType::TT_Numerical);
 	}
 
-	virtual bool IsMatchByData(const FAssetData& AssetData) override
+	virtual bool IsMatchByData_Implementation(const FAssetData& AssetData) override
 	{
 		if (AssetData == nullptr)
 			return false;
@@ -54,7 +54,7 @@ public:
 		return false;
 	}
 
-	virtual bool CheckImplementByData(const FAssetData& AssetData, const UObject* AssetObj) override
+	virtual bool CheckImplementByData_Implementation(const FAssetData& AssetData, const UObject* AssetObj) override
 	{
 		const UMaterial* Mat = Cast<UMaterial>(AssetObj);
 		if (Mat == nullptr)

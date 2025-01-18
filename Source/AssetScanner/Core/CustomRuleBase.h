@@ -8,22 +8,23 @@
 #include "UObject/Object.h"
 #include "CustomRuleBase.generated.h"
 
-UENUM()
-enum class RulePriority
+UENUM(BlueprintType)
+enum class RulePriority : uint8
 {
-	Medium,
-	High
+	Medium UMETA(DisplayName = "Medium"),
+	High UMETA(DisplayName = "High")
 };
 
 /**
- * 
+ * Base class for custom asset scanning rules
+ * Can be extended in Blueprint
  */
-UCLASS(Abstract)
+UCLASS(Blueprintable, Abstract)
 class ASSETSCANNER_API UCustomRuleBase : public UObject
 {
 	GENERATED_BODY()
 public:
-
+	UFUNCTION(BlueprintCallable, Category = "Asset Scanner")
 	bool Check()
 	{
 		if (!DataTable->IsValidLowLevel())
@@ -33,20 +34,46 @@ public:
 		}
 		return CheckImplement();
 	}
-	virtual ECustomRuleIds GetRuleID() PURE_VIRTUAL(UCustomRuleBase::GetRuleID, return ECustomRuleIds::None; );
-	virtual FString GetName() PURE_VIRTUAL(UCustomRuleBase::GetName, return TEXT(""); );
-	virtual FString GetDescription() PURE_VIRTUAL(UCustomRuleBase::GetDescription, return TEXT(""); );
-	virtual void InitDataTable(TObjectPtr<URuleDataTable> InDataTable) PURE_VIRTUAL(UCustomRuleBase::InitDataTable, )
-	virtual bool CheckImplement() { return false; }
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Asset Scanner")
+	ECustomRuleIds GetRuleID();
+	virtual ECustomRuleIds GetRuleID_Implementation() { return ECustomRuleIds::None; }
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Asset Scanner")
+	FString GetName();
+	virtual FString GetName_Implementation() { return TEXT(""); }
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Asset Scanner")
+	FString GetDescription();
+	virtual FString GetDescription_Implementation() { return TEXT(""); }
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Asset Scanner")
+	void InitDataTable(URuleDataTable* InDataTable);
 	
-	virtual RulePriority GetPriority() { return RulePriority::Medium; }
+	virtual void InitDataTable_Implementation(URuleDataTable* InDataTable) {}
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Asset Scanner")
+	bool CheckImplement();
+	virtual bool CheckImplement_Implementation() { return false; }
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Asset Scanner")
+	RulePriority GetPriority();
+	virtual RulePriority GetPriority_Implementation() { return RulePriority::Medium; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Asset Scanner")
 	virtual bool HasTable() { return Validate(); }
 
 	// 根据单个FAssetData进行检测
-	virtual bool IsMatchByData(const FAssetData& AssetData) { return false; }
-	virtual bool CheckImplementByData(const FAssetData& AssetData, const UObject* AssetObj) { return false; }
+	UFUNCTION(BlueprintNativeEvent, Category = "Asset Scanner")
+	bool IsMatchByData(const FAssetData& AssetData);
+	virtual bool IsMatchByData_Implementation(const FAssetData& AssetData) { return false; }
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Asset Scanner")
+	bool CheckImplementByData(const FAssetData& AssetData, const UObject* AssetObj);
+	virtual bool CheckImplementByData_Implementation(const FAssetData& AssetData, const UObject* AssetObj) { return false; }
 	
-    void SaveToCSV(const FString& BaseDir)
+	UFUNCTION(BlueprintCallable, Category = "Asset Scanner")
+	void SaveToCSV(const FString& BaseDir)
 	{
 		if (!Validate())
 		{
@@ -57,7 +84,8 @@ public:
 		DataTable->SaveToCSV(CsvPath);
 	}
 
-	const TObjectPtr<URuleDataTable> GetDataTable() {
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Asset Scanner")
+	const URuleDataTable* GetDataTable() {
 		if (HasTable())
 		{
 			return DataTable;
@@ -68,6 +96,7 @@ public:
 		}
 	}
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Asset Scanner")
 	bool Validate() const
 	{
 		if (DataTable == nullptr)
@@ -83,6 +112,6 @@ public:
 	}
 
 protected:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<URuleDataTable> DataTable;
 };

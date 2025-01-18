@@ -24,8 +24,10 @@ Unreal Engine 5 plugin use for Asset Checking with CustomRules
 
 方法二针对资源加载优化
 
-# TODO
+
 针对场景Actor扫描，可以动态添加Combo筛选过滤SceneName
+可以继承 UCustomRule_SceneActorBase，其他类似
+
 
 如果能帮上忙，请点个Star，有问题提Pull Request
 

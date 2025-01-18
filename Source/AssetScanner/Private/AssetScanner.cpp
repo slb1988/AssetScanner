@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "AssetScanner.h"
@@ -9,9 +9,11 @@
 #include "LevelEditor.h"
 #include "AssetRegistry/IAssetRegistry.h"
 #include "AssetScanner/Core/CustomRuleBase.h"
+#include "AssetScanner/Rules/CustomRule_SceneActorBase.h"
 #include "AssetScanner/Slate/AssetScannerBrowser.h"
 #include "Engine/AssetManager.h"
 #include "Toolkits/AssetEditorToolkit.h"
+// #include "Engine/Scene.h"
 
 UE_DISABLE_OPTIMIZATION
 
@@ -28,23 +30,23 @@ void FAssetScanner::BuildMenuEntry(FMenuBuilder& Builder)
 void FAssetScanner::RegisterMenus()
 {
 	TSharedPtr<FExtender> Extender = MakeShared<FExtender>();
-	
+
 	TSharedPtr<FUICommandList> ActionList = MakeShareable(new FUICommandList);
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-	ActionList->MapAction( FAssetScannerCommands::Get().Command_OpenContentBrowser,
-		FExecuteAction::CreateStatic( &FAssetScannerActionCallbacks::AssetScannerBrowser ));
-	
+	ActionList->MapAction(FAssetScannerCommands::Get().Command_OpenContentBrowser,
+	                      FExecuteAction::CreateStatic(&FAssetScannerActionCallbacks::AssetScannerBrowser));
+
 	ActionList->MapAction(FAssetScannerCommands::Get().Command_RunCommandlet,
-		FExecuteAction::CreateStatic(&FAssetScannerActionCallbacks::ScanAssets));
+	                      FExecuteAction::CreateStatic(&FAssetScannerActionCallbacks::ScanAssets));
 
 	{
 		TSharedPtr<FExtender> NewMenuExtender = MakeShareable(new FExtender);
 		NewMenuExtender->AddMenuExtension("Tools",
-			EExtensionHook::After,
-			ActionList,
-			FMenuExtensionDelegate::CreateStatic(&FAssetScanner::BuildMenuEntry));
+		                                  EExtensionHook::After,
+		                                  ActionList,
+		                                  FMenuExtensionDelegate::CreateStatic(&FAssetScanner::BuildMenuEntry));
 
 		LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(NewMenuExtender);
 	}
@@ -75,11 +77,12 @@ void FAssetScanner::Uninitialize()
 void FAssetScanner::Register()
 {
 	FAssetScannerCommands::Register();
-	
+
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(GAssetScannerBrowserTabName,
-		FOnSpawnTab::CreateRaw(this, &FAssetScanner::OnSpawnAssetScannerBrowser))
-			.SetDisplayName(LOCTEXT("BrowserTitle", "AssetScannerBrowser"))
-			.SetMenuType(ETabSpawnerMenuType::Hidden);
+	                                                  FOnSpawnTab::CreateRaw(
+		                                                  this, &FAssetScanner::OnSpawnAssetScannerBrowser))
+	                        .SetDisplayName(LOCTEXT("BrowserTitle", "AssetScannerBrowser"))
+	                        .SetMenuType(ETabSpawnerMenuType::Hidden);
 }
 
 void FAssetScanner::Unregister()
@@ -100,7 +103,7 @@ TSharedRef<SDockTab> FAssetScanner::OnSpawnAssetScannerBrowser(const FSpawnTabAr
 
 void FAssetScannerActionCallbacks::ScanAssets()
 {
-	FindAndCheckCustomRules(-1);	
+	FindAndCheckCustomRules(-1);
 }
 
 void FAssetScannerActionCallbacks::AssetScannerBrowser()
@@ -114,6 +117,7 @@ const URuleDataTable* FAssetScannerActionCallbacks::FindAndCheckCustomRules(int 
 	FString BaseCsvDir = FPaths::Combine(FPaths::ProjectSavedDir(), "AssetScanner");
 
 	TArray<TObjectPtr<UCustomRuleBase>> Rules;
+	TArray<TObjectPtr<UCustomRule_SceneActorBase>> SceneRules;
 	for (TObjectIterator<UClass> It; It; ++It)
 	{
 		UClass* Class = *It;
@@ -122,11 +126,19 @@ const URuleDataTable* FAssetScannerActionCallbacks::FindAndCheckCustomRules(int 
 		{
 			UCustomRuleBase* RuleInstance = NewObject<UCustomRuleBase>(GetTransientPackage(), Class);
 			Rules.Add(RuleInstance);
+
+			// 检查是否是场景检查规则
+			UCustomRule_SceneActorBase* SceneRule = Cast<UCustomRule_SceneActorBase>(RuleInstance);
+			if (SceneRule)
+			{
+				SceneRules.Add(SceneRule);
+			}
 			if (RuleId >= 0 && RuleId != static_cast<int32>(RuleInstance->GetRuleID()))
 			{
 				continue;
 			}
-			UE_LOG(LogTemp, Display, TEXT("Found Custom Rule: %s - %s"), *RuleInstance->GetName(), *RuleInstance->GetDescription());
+			UE_LOG(LogTemp, Display, TEXT("Found Custom Rule: %s - %s"), *RuleInstance->GetName(),
+			       *RuleInstance->GetDescription());
 
 			if (RuleInstance)
 			{
@@ -141,11 +153,11 @@ const URuleDataTable* FAssetScannerActionCallbacks::FindAndCheckCustomRules(int 
 	Filter.ClassPaths.Add(UObject::StaticClass()->GetClassPathName());
 	for (FDirectoryPath& DirPath : Settings->BaseScanPaths)
 	{
-		Filter.PackagePaths.Add(FName(DirPath.Path));	
+		Filter.PackagePaths.Add(FName(DirPath.Path));
 	}
-	Filter.bRecursiveClasses = true;	// 这样可以查找到所有的 Texture 的子类，如 Texture2D 等
+	Filter.bRecursiveClasses = true; // 这样可以查找到所有的 Texture 的子类，如 Texture2D 等
 	Filter.bRecursivePaths = true;
-	
+
 	UAssetManager& Manager = UAssetManager::Get();
 	IAssetRegistry& AssetRegistry = Manager.GetAssetRegistry();
 	TArray<FAssetData> AssetDatas;
@@ -157,13 +169,20 @@ const URuleDataTable* FAssetScannerActionCallbacks::FindAndCheckCustomRules(int 
 	for (int i = 0; i < AssetDatas.Num(); i++)
 	{
 		const FAssetData& AssetData = AssetDatas[i];
+		UObject* AssetObj = AssetData.GetAsset();
+		// AssetObj = UEditorAssetLibrary::LoadAsset(AssetData.PackageName.ToString());
+		if (!AssetData.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AssetData is invalid!"));
+			continue;
+		}
 		if (SlowTask.ShouldCancel())
 		{
 			break;
 		}
 		// 每次循环更新进度
 		SlowTask.EnterProgressFrame(1, FText::FromString(FString::Printf(
-			TEXT("Processing asset %d/%d"), i + 1, AssetDatas.Num())));
+			                            TEXT("Processing asset %d/%d"), i + 1, AssetDatas.Num())));
 		bool bIsExcluded = false;
 		for (auto& DirPath : Settings->ExcludedScanPaths)
 		{
@@ -175,7 +194,7 @@ const URuleDataTable* FAssetScannerActionCallbacks::FindAndCheckCustomRules(int 
 		}
 		if (bIsExcluded)
 			continue;
-		
+
 		for (TObjectPtr<UCustomRuleBase> Rule : Rules)
 		{
 			if (RuleId >= 0 && RuleId != static_cast<int32>(Rule->GetRuleID()))
@@ -184,10 +203,37 @@ const URuleDataTable* FAssetScannerActionCallbacks::FindAndCheckCustomRules(int 
 			}
 			if (Rule->IsMatchByData(AssetData))
 			{
-				UObject* AssetObj = UEditorAssetLibrary::LoadAsset(AssetData.PackageName.ToString());
-				UE_LOG(LogTemp, Display, TEXT("Found Match Rule: %s - %s"), *Rule.Get()->GetName(), *Rule.Get()->GetDescription());
+				UE_LOG(LogTemp, Display, TEXT("Found Match Rule: %s - %s"), *Rule.Get()->GetName(),
+				       *Rule.Get()->GetDescription());
 
 				Rule->CheckImplementByData(AssetData, AssetObj);
+			}
+		}
+        UClass* AssetClass = AssetData.GetClass();
+        if (!AssetClass)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("AssetData->GetClass() returned null!"));
+            continue;
+        }
+		// 检查是否是场景资产
+		if (AssetClass->IsChildOf(UWorld::StaticClass()))
+		{
+			if (AssetObj)
+			{
+				UWorld* SceneObj = Cast<UWorld>(AssetObj);
+				for (TObjectPtr<UCustomRule_SceneActorBase> SceneRule : SceneRules)
+				{
+                    if (RuleId >= 0 && RuleId != static_cast<int32>(SceneRule->GetRuleID()))
+                    {
+                        continue;
+                    }
+					// 检查是否匹配该规则
+					if (SceneRule->IsSceneMatch(AssetData, SceneObj))
+					{
+						// 执行场景检查
+						SceneRule->CheckScene_Implement(AssetData, SceneObj);
+					}
+				}
 			}
 		}
 	}
@@ -204,14 +250,12 @@ const URuleDataTable* FAssetScannerActionCallbacks::FindAndCheckCustomRules(int 
 		if (static_cast<int32>(Rule.Get()->GetRuleID()) == RuleId)
 		{
 			UCustomRuleBase* a = Rule.Get();
-			TObjectPtr<URuleDataTable> dt = a->GetDataTable();
-			URuleDataTable* dt_ptr = dt;
-			return dt_ptr;
+			return a->GetDataTable();
 		}
 	}
-	
+
 	Rules.Empty();
-	
+
 	return nullptr;
 }
 

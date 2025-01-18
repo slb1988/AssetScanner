@@ -59,4 +59,4 @@ void FAssetScannerModule::UnregisterSettings()
 
 #undef LOCTEXT_NAMESPACE
 
-IMPLEMENT_MODULE(FAssetScannerModule, AssetScannerEditor)
+IMPLEMENT_MODULE(FAssetScannerModule, AssetScanner)
