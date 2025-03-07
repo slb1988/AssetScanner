@@ -7,6 +7,8 @@ Unreal Engine 5 plugin use for Asset Checking with CustomRules
 
 ![](/Pic/AssetCleannerBrowser.jpg)
 
+![](/Pic/BrowserWithScene.jpg)
+
 - Tools/AssetCleannerCommandlet
 
 ![](/Pic/AssetScannerCommandlet.png)
